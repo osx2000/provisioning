@@ -18,6 +18,10 @@ resource "null_resource" "kubectl" {
   }
 
   provisioner "local-exec" {
+    command = "echo The .kube folder is $HOME/.kube/${var.cluster_name}"
+  }
+
+  provisioner "local-exec" {
     command = <<EOT
       scp -oStrictHostKeyChecking=no \
         root@${element(var.connections, 0)}:/etc/kubernetes/pki/{apiserver-kubelet-client.key,apiserver-kubelet-client.crt,ca.crt} \

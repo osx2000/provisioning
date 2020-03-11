@@ -9,11 +9,11 @@ variable "etcd_node_count" {
 }
 
 variable "domain" {
-  default = "example.com"
+  default = "c.osx2000.com"
 }
 
 variable "hostname_format" {
-  default = "kube%d"
+  default = "ouslykube%d"
 }
 
 /* hcloud */
@@ -21,10 +21,10 @@ variable "hcloud_token" {
   default = ""
 }
 
-variable "hcloud_ssh_keys" {
-  type    = list(string)
-  default = [""]
-}
+#variable "hcloud_ssh_keys" {
+#  type    = list(string)
+#  #default = ["ously_test_k8s_terra"]
+#}
 
 variable "hcloud_location" {
   default = "nbg1"

@@ -21,33 +21,33 @@ variable "kubernetes_interface" {
 }
 
 resource "null_resource" "firewall" {
-  count = "${var.node_count}"
+  count = var.node_count
 
   triggers = {
-    template = "${data.template_file.ufw.rendered}"
+    template = data.template_file.ufw.rendered
   }
 
   connection {
-    host  = "${element(var.connections, count.index)}"
+    host  = element(var.connections, count.index)
     user  = "root"
     agent = true
   }
 
   provisioner "remote-exec" {
     inline = [
-      "${data.template_file.ufw.rendered}"
+      data.template_file.ufw.rendered
     ]
       
   }
 }
 
 data "template_file" "ufw" {
-  template = "${file("${path.module}/scripts/ufw.sh")}"
+  template = file("${path.module}/scripts/ufw.sh")
 
   vars = {
-    private_interface    = "${var.private_interface}"
-    kubernetes_interface = "${var.kubernetes_interface}"
-    vpn_interface        = "${var.vpn_interface}"
-    vpn_port             = "${var.vpn_port}"
+    private_interface    = var.private_interface
+    kubernetes_interface = var.kubernetes_interface
+    vpn_interface        = var.vpn_interface
+    vpn_port             = var.vpn_port
   }
 }

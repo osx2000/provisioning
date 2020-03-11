@@ -6,3 +6,9 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+/.idea/.gitignore
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/provisioning.iml
+/.idea/vcs.xml

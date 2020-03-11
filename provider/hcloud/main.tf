@@ -25,7 +25,7 @@ variable "ssh_keys" {
 }
 
 provider "hcloud" {
-  token = "${var.token}"
+  token = var.token
 }
 
 variable "apt_packages" {
@@ -33,14 +33,20 @@ variable "apt_packages" {
   default = []
 }
 
-resource "hcloud_server" "host" {
-  name        = "${format(var.hostname_format, count.index + 1)}"
-  location    = "${var.location}"
-  image       = "${var.image}"
-  server_type = "${var.type}"
-  ssh_keys    = "${var.ssh_keys}"
+resource "hcloud_ssh_key" "default" {
+  name = "default"
+  public_key = "${file("~/.ssh/ously_test_k8s_terra.pub")}"
+}
 
-  count = "${var.hosts}"
+resource "hcloud_server" "host" {
+  name        = format(var.hostname_format, count.index + 1)
+  location    = var.location
+  image       = var.image
+  server_type = var.type
+  #ssh_keys    = var.ssh_keys
+  ssh_keys    = [hcloud_ssh_key.default.name]
+
+  count = var.hosts
 
   connection {
     user = "root"
@@ -58,6 +64,28 @@ resource "hcloud_server" "host" {
   }
 }
 
+####
+resource "hcloud_network" "cluster-network" {
+  name = "private-cluster"
+  ip_range = "192.168.0.0/16"
+}
+
+resource "hcloud_network_subnet" "cluster-subnet" {
+  ip_range = "192.168.1.0/24"
+  network_id = hcloud_network.cluster-network.id
+  network_zone = "eu-central"
+  type = "server"
+}
+
+resource "hcloud_server_network" "host_network" {
+  count = var.hosts
+
+  server_id = hcloud_server.host[count.index].id
+  network_id = hcloud_network.cluster-network.id
+  # ip gets auto assigned
+}
+####
+
 #resource "hcloud_volume" "volume" {
 #  name = "${format(var.hostname_format, count.index + 1)}"
 #  size = 10
@@ -68,16 +96,21 @@ resource "hcloud_server" "host" {
 #}
 
 output "hostnames" {
-  value = "${hcloud_server.host.*.name}"
+  value = hcloud_server.host.*.name
 }
 
 output "public_ips" {
-  value = "${hcloud_server.host.*.ipv4_address}"
+  value = hcloud_server.host.*.ipv4_address
 }
 
 output "private_ips" {
-  value = "${hcloud_server.host.*.ipv4_address}"
+  value = hcloud_server_network.host_network.*.ip
+ # value = hcloud_server_network.host_network.*.ip
 }
+
+#output "private_ips" {
+#  value = "${hcloud_server.host.*.ipv4_address}"
+#}
 
 output "private_network_interface" {
   value = "eth0"
